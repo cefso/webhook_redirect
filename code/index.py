@@ -77,8 +77,9 @@ def process_event_discrod(event):
 
     discord_webhook = os.environ.get('DISCORD_URL')
 
-    # 发送消息到keep
-    response = send_to_webhook(discord_webhook, params)
+    # 发送消息到webhook
+    message = json.loads(params)
+    response = send_to_webhook(discord_webhook, message)
 
     return {
         'statusCode': 200,
@@ -96,8 +97,10 @@ def send_to_webhook(url, message):
 
     response = requests.post(url, headers=headers, json=message)
 
-    logger.info("消息转发到discord成功")
-
-    logger.info(response.json())
-
-    return response.json()
+    status_code = response.status_code
+    if status_code == 204:
+        logger.info("消息转发到discord成功")
+        return {'message': '消息转发到discord成功'}
+    else:
+        logger.info("消息转发到discord失败")
+        return {'message': '消息转发到discord失败'}
